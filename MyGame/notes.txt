@@ -1,0 +1,209 @@
+$$$ all of these checks are made
+    AFTER the character has moved already,
+    AFTER the bg_rect.x has been moved by obj_x_vel,
+    AFTER the bg_rect2.x has been moved by obj_x_vel,
+    BEFORE the render has happened
+
+    bg_rect = base rectangle pointing to where on the image to render
+    bg_rect_2 = helper rectangle for the same purpose
+    obj_x_velocity = the objects x velocity...
+
+    BG_IMG_WIDTH = width of the background image in pixels
+    SCREEN_WIDTH = width of the window / screen in pixels
+
+
+
+
+
+
+
+    ** bg_phys_rect.w's should never exceed SCREEN_WIDTH
+        SAME for their X coordinate
+
+      bg_img_rect.w's should never exceed SCREEN_WIDTH
+      their x coordinate CAN AND SHOULD!!
+
+      bg_img_rect and phs_rect origin are synced (in terms of x)
+
+    Move the images
+    bg_img_rect.x += bg_x_vel;
+    bg_img_rect2.x += bg_x_vel;
+
+
+
+    //Check to see if player moved left
+
+    if( bg_x_vel < 0 )
+    {
+
+      //Check to see if a split has begun
+      if( bg_img_rect.x < 0 )
+      {
+
+
+        // Adjust the image rects first
+        bg_img_rect2.x = BG_IMG_WIDTH + bg_img_rect.x;
+        bg_img_rect2.w = BG_IMG_WIDTH - bg_img_rect2.x;
+
+        bg_img_rect.x = 0;
+        bg_img_rect.w = SCREEN_WIDTH - bg_img_rect2.w;
+
+        // Adjust the phs rects next
+        bg_phs_rect2.x = 0;
+        bg_phs_rect2.w = bg_phs_rect2.w;
+
+        bg_phs_rect.x = bg_phs_rect2.x + bg_phs_rect2.w;
+        bg_phs_rect.w = bg_img_rect.w;
+
+      }
+
+      // Check to see if there is already a split
+
+      else if( bg_img_rect2.w > 0 )
+      {
+
+        bg_img_rect.x = 0;
+        bg_img_rect2.w -= bg_x_vel;
+        bg_img_rect.w += bg_x_vel;
+
+        // Check to see if the split solved itself
+        if( bg_img_rect2.w >= SCREEN_WIDTH )
+        {
+          bg_img_rect.x = bg_img_rect2.x;
+          bg_phs_rect.x = 0;
+
+          bg_img_rect.w = SCREEN_WIDTH;
+          bg_phs_rect.w = SCREEN_WIDTH;
+
+          bg_img_rect2.w = 0;
+        }
+
+
+      }
+
+
+    }
+
+
+
+
+
+
+
+
+    bg_img_rect.x += bg_x_vel;
+
+
+    if(bg_img_rect.x + SCREEN_WIDTH > BG_IMG_WIDTH)
+    {
+
+      bg_img_rect.w = BG_IMG_WIDTH - bg_img_rect.x;
+      bg_img_rect2.x = 0;
+      bg_img_rect2.w = SCREEN_WIDTH - bg_img_rect.w;
+
+      if(bg_img_rect2.w == SCREEN_WIDTH)
+      {
+        bg_img_rect.x = bg_img_rect2.x;
+        bg_img_rect.w = SCREEN_WIDTH;
+        bg_img_rect2.w = 0;
+      }
+
+
+    }
+
+    bg_phs_rect.x = bg_img_rect.x;
+    bg_phs_rect.w = bg_img_rect.w;
+    bg_phs_rect2.x = bg_img_rect2.x;
+    bg_phs_rect2.w = bg_img_rect2.w;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Note::: doesnt necessarily work if character moves fast enough to completely skip the split
+*** if the camera view isnt split yet
+
+//if ( bg_rect2.w == 0 )
+//{
+//  nothing
+//}
+
+
+
+*** if box has moved to left out of bounds, beginning a split
+
+if (bg_rect.x < 0 && bg_rect2.w == 0){
+
+  bg_rect2.x = BG_IMG_WIDTH + bg_rect.x;
+  bg_rect2.w = BG_IMG_WIDTH - bg_rect2.x;
+
+  bg_rect.x = 0;
+  bg_rect.w = SCREEN_WIDTH - bg_rect2.w;
+
+
+}
+
+*** if there already is a split, moving left (obj_x_vel < 0 )
+
+if( bg_rect2.w > 0 )
+{
+
+  bg_rect2.w -= obj_vel;
+  bg_rect.x = 0;
+  bg_rect.w += ob_vel;
+
+  // need to check if split solved itself
+  // if so, convert the rect2 to the rect
+  if (bg_rect2.w >= SCREEN_WIDTH)
+  {
+    bg_rect.x = bg_rect2.x
+    bg_rect.w = SCREEN_WIDTH;
+    bg_rect2.w = 0;
+  }
+
+}
+
+
+*** if box is moving right out of bounds, beginning a split
+
+if( bg_rect.x + SCREEN_WIDTH > BG_IMG_WIDTH && bg_rect2.w == 0)
+{
+
+  bg_rect2.x = bg_rect.x;
+  bg_rect2.w = BG_IMG_WIDTH - bg_rect2.x;
+
+  bg_rect.x = 0;
+  bg_rect.w = SCREEN_WIDTH - bg_rect2.w;
+
+}
+
+
+*** if there already is a split, moving right
+
+if( bg_rect2.x + bg_rect2.w > BG_IMG_WIDTH )
+{
+
+  bg_rect2.w -= obj_vel;
+  bg_rect.x = 0;
+  bg_rect.w += obj_vel;
+
+
+  // need to check if split solved itself
+  // if so, convert the rect2 to the rect
+  if (bg_rect2.w <= 0)
+  {
+    bg_rect.x = bg_rect2.x
+    bg_rect.w = SCREEN_WIDTH;
+    bg_rect2.w = 0;
+  }
+
+}
